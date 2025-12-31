@@ -13,6 +13,7 @@ import { Login } from './components/Login';
 import { Profile } from './components/Profile';
 import { Notifications } from './components/Notifications';
 import { ServerLogs } from './components/ServerLogs';
+import { Dashboard } from './components/Dashboard';
 import { Trade, AlertConfig, SavedAlert, AlertCondition, BrokerConfig, UserProfile, NotificationItem, StrategyConfig } from './types';
 import { Activity, Zap, Server, BarChart2, Bell, Clock, Layers } from 'lucide-react';
 
@@ -179,17 +180,17 @@ const App: React.FC = () => {
       tokenExpiry: '31/12/2025 08:30:00'
   });
   
-  const [currentView, setCurrentView] = useState('trade_history');
+  const [currentView, setCurrentView] = useState('dashboard');
 
   const handleLogin = (userData?: Partial<UserProfile>) => {
       if (userData) setUser(prev => ({ ...prev, ...userData }));
       setIsAuthenticated(true);
-      setCurrentView('trade_history'); 
+      setCurrentView('dashboard'); 
   };
 
   const handleLogout = () => {
       setIsAuthenticated(false);
-      setCurrentView('trade_history');
+      setCurrentView('dashboard');
   };
 
   const handleAddAlert = (trade: Trade) => {
@@ -275,10 +276,10 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (currentView) {
+      case 'dashboard':
+        return <Dashboard />;
       case 'trade_history':
         return <TradeTable data={trades} onAddAlert={handleAddAlert} />;
-      case 'dashboard':
-        return <PlaceholderPage title="Dashboard" icon={<BarChart2 size={32} />} description="Overview of your trading performance and active strategy metrics will appear here." />;
       case 'strategy_builder':
         return <StrategyBuilder initialData={editingStrategy} onSave={handleStrategySave} brokerConfig={brokerConfig} onCancel={() => { setEditingStrategy(null); setCurrentView('my_strategies'); }} />;
       case 'my_strategies':
