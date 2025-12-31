@@ -15,7 +15,8 @@ import { Notifications } from './components/Notifications';
 import { ServerLogs } from './components/ServerLogs';
 import { Dashboard } from './components/Dashboard';
 import { Trade, AlertConfig, SavedAlert, AlertCondition, BrokerConfig, UserProfile, NotificationItem, StrategyConfig } from './types';
-import { Activity, Zap, Server, BarChart2, Bell, Clock, Layers } from 'lucide-react';
+import { Activity, Zap, Server, BarChart2, Bell, Clock, Layers, Loader2, ShieldCheck } from 'lucide-react';
+import { Logo } from './components/Logo';
 
 // Helper to generate dynamic mock data
 const generateMockData = (): Trade[] => {
@@ -86,7 +87,7 @@ const PlaceholderPage: React.FC<{ title: string; icon: React.ReactNode; descript
       </div>
     </div>
     <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
-    <p className="max-w-md">{description}</p>
+    <p className="max-md">{description}</p>
     <button className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
       Refresh Data
     </button>
@@ -94,7 +95,10 @@ const PlaceholderPage: React.FC<{ title: string; icon: React.ReactNode; descript
 );
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // SET TO TRUE BY DEFAULT TO ENSURE APP "OPENS" IMMEDIATELY
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isBooting, setIsBooting] = useState(true);
+  
   const [user, setUser] = useState<UserProfile>(DEFAULT_USER);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
@@ -127,6 +131,14 @@ const App: React.FC = () => {
     }
   ]);
   const [editingStrategy, setEditingStrategy] = useState<StrategyConfig | null>(null);
+
+  useEffect(() => {
+    // Artificial boot up delay for professional feel
+    const timer = setTimeout(() => {
+        setIsBooting(false);
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const checkTimeAndDate = () => {
@@ -271,6 +283,31 @@ const App: React.FC = () => {
   const handleClearNotifications = () => {
       setNotifications([]);
   };
+
+  // Boot up screen
+  if (isBooting) {
+      return (
+          <div className="min-h-screen bg-[#0c1017] flex flex-col items-center justify-center p-4">
+              <div className="animate-pulse mb-8">
+                  <Logo variant="dark" className="scale-150" />
+              </div>
+              <div className="flex items-center gap-3 text-blue-500 font-bold tracking-widest uppercase text-xs">
+                  <Loader2 className="animate-spin" size={20} />
+                  Initializing Cloud Engine...
+              </div>
+              <div className="mt-12 w-64 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-600 animate-[progress_1.8s_ease-in-out] w-full origin-left"></div>
+              </div>
+              <style>{`
+                @keyframes progress {
+                    0% { transform: scaleX(0); }
+                    100% { transform: scaleX(1); }
+                }
+              `}</style>
+              <p className="mt-4 text-gray-600 text-[10px] font-mono">NODE: imaginative-clafoutis-8dc5b0</p>
+          </div>
+      );
+  }
 
   if (!isAuthenticated) return <Login onLogin={handleLogin} />;
 

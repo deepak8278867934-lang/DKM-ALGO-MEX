@@ -37,7 +37,7 @@ export const Dashboard: React.FC = () => {
                         </div>
                         <h2 className="text-white text-xl font-bold tracking-tight">System Live & Published</h2>
                     </div>
-                    <p className="text-gray-400 text-sm">Deployment ID: <span className="text-blue-400 font-mono">magnificent-gumption-847047</span> • Status: Active</p>
+                    <p className="text-gray-400 text-sm">Deployment ID: <span className="text-blue-400 font-mono">imaginative-clafoutis-8dc5b0</span> • Status: Active</p>
                 </div>
                 <div className="flex items-center gap-4 relative z-10">
                     <div className="text-right hidden sm:block">
