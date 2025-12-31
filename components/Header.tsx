@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, User, Power, CheckCircle, AlertTriangle, Info, Trash2, GraduationCap, Zap, Smartphone, Tablet, Monitor, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { Menu, Bell, User, Power, CheckCircle, AlertTriangle, Info, Trash2, GraduationCap, Zap, Smartphone, Tablet, Monitor, Cloud, CloudOff, RefreshCw, Activity } from 'lucide-react';
 import { UserProfile, NotificationItem } from '../types';
 
 interface HeaderProps {
@@ -27,12 +27,23 @@ export const Header: React.FC<HeaderProps> = ({
   const [tradingMode, setTradingMode] = useState<'DEMO' | 'LIVE'>('DEMO');
   const [isTradingActive, setIsTradingActive] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [latency, setLatency] = useState(24);
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight
   });
   
   const notificationRef = useRef<HTMLDivElement>(null);
+
+  // Simulate shifting latency for realism
+  useEffect(() => {
+    if (isPublished) {
+        const interval = setInterval(() => {
+            setLatency(Math.floor(Math.random() * (45 - 18) + 18));
+        }, 3000);
+        return () => clearInterval(interval);
+    }
+  }, [isPublished]);
 
   // Track window resize for device info
   useEffect(() => {
@@ -104,7 +115,10 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Cloud Status Indicator */}
-      <div className="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 ml-2">
+      <div 
+        className="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 ml-2 cursor-pointer hover:bg-gray-100 transition-colors"
+        onClick={() => onNavigate('broker_response')}
+      >
          {isSyncing ? (
              <RefreshCw size={14} className="text-blue-500 animate-spin" />
          ) : isPublished ? (
@@ -113,15 +127,24 @@ export const Header: React.FC<HeaderProps> = ({
              <CloudOff size={14} className="text-orange-500" />
          )}
          <div className="flex flex-col">
-             <span className={`text-[9px] font-black uppercase tracking-widest ${isSyncing ? 'text-blue-600' : isPublished ? 'text-green-600' : 'text-orange-600'}`}>
-                 {isSyncing ? 'Syncing...' : isPublished ? 'Cloud Live' : 'Not Published'}
-             </span>
-             {isPublished && !isSyncing && (
-                 <span className="text-[8px] text-gray-400 font-mono">ID: dk-882371-pub</span>
-             )}
+             <div className="flex items-center gap-1.5">
+                 <span className={`text-[9px] font-black uppercase tracking-widest ${isSyncing ? 'text-blue-600' : isPublished ? 'text-green-600' : 'text-orange-600'}`}>
+                     {isSyncing ? 'Syncing...' : isPublished ? 'Cloud Published' : 'Local Only'}
+                 </span>
+                 {isPublished && !isSyncing && (
+                     <div className="flex items-center gap-1 text-[8px] font-bold text-gray-400">
+                         <Activity size={8} className="text-green-500" />
+                         <span>{latency}ms</span>
+                     </div>
+                 )}
+             </div>
+             <span className="text-[7px] text-gray-400 font-mono tracking-tight">SSL: AES-256 SECURED</span>
          </div>
          {isPublished && (
-            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping ml-1 opacity-75"></div>
+            <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </div>
          )}
       </div>
 

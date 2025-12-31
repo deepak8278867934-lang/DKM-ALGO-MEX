@@ -12,6 +12,7 @@ import { PineScriptManager } from './components/PineScriptManager';
 import { Login } from './components/Login';
 import { Profile } from './components/Profile';
 import { Notifications } from './components/Notifications';
+import { ServerLogs } from './components/ServerLogs';
 import { Trade, AlertConfig, SavedAlert, AlertCondition, BrokerConfig, UserProfile, NotificationItem, StrategyConfig } from './types';
 import { Activity, Zap, Server, BarChart2, Bell, Clock, Layers } from 'lucide-react';
 
@@ -302,6 +303,8 @@ const App: React.FC = () => {
         return <TradingViewIntegration brokerConfig={brokerConfig} />;
       case 'pine_script_logic':
         return <PineScriptManager />;
+      case 'broker_response':
+        return <ServerLogs isPublished={isPublished} />;
       case 'notifications':
         return <Notifications notifications={notifications} onUpdateNotifications={handleUpdateNotifications} />;
       case 'profile':
