@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, User, Power, CheckCircle, AlertTriangle, Info, Trash2, GraduationCap, Zap, Smartphone, Tablet, Monitor } from 'lucide-react';
+import { Menu, Bell, User, Power, CheckCircle, AlertTriangle, Info, Trash2, GraduationCap, Zap, Smartphone, Tablet, Monitor, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { UserProfile, NotificationItem } from '../types';
 
 interface HeaderProps {
@@ -10,6 +10,8 @@ interface HeaderProps {
   user?: UserProfile;
   notifications: NotificationItem[];
   onClearNotifications: () => void;
+  isPublished?: boolean;
+  isSyncing?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -18,7 +20,9 @@ export const Header: React.FC<HeaderProps> = ({
     onNavigate, 
     user,
     notifications,
-    onClearNotifications
+    onClearNotifications,
+    isPublished = true,
+    isSyncing = false
 }) => {
   const [tradingMode, setTradingMode] = useState<'DEMO' | 'LIVE'>('DEMO');
   const [isTradingActive, setIsTradingActive] = useState(false);
@@ -99,18 +103,26 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
       </div>
 
-      {/* Desktop Navigation Helper Items */}
-      <div className="hidden lg:flex items-center gap-4">
-        {/* Real-time Device Monitor Badge */}
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-md border text-[11px] font-mono font-bold transition-all duration-300 ${device.color}`}>
-           {device.icon}
-           <span className="whitespace-nowrap">
-             {windowSize.width} × {windowSize.height}
-           </span>
-           <span className="border-l border-current pl-2 opacity-70 uppercase tracking-tighter">
-             {device.label}
-           </span>
-        </div>
+      {/* Cloud Status Indicator */}
+      <div className="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 ml-2">
+         {isSyncing ? (
+             <RefreshCw size={14} className="text-blue-500 animate-spin" />
+         ) : isPublished ? (
+             <Cloud size={14} className="text-green-500" />
+         ) : (
+             <CloudOff size={14} className="text-orange-500" />
+         )}
+         <div className="flex flex-col">
+             <span className={`text-[9px] font-black uppercase tracking-widest ${isSyncing ? 'text-blue-600' : isPublished ? 'text-green-600' : 'text-orange-600'}`}>
+                 {isSyncing ? 'Syncing...' : isPublished ? 'Cloud Live' : 'Not Published'}
+             </span>
+             {isPublished && !isSyncing && (
+                 <span className="text-[8px] text-gray-400 font-mono">ID: dk-882371-pub</span>
+             )}
+         </div>
+         {isPublished && (
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping ml-1 opacity-75"></div>
+         )}
       </div>
 
       <div className="flex items-center gap-1 sm:gap-4 md:gap-6 ml-auto lg:ml-0">
@@ -130,7 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
         </button>
 
-        {/* Trading Mode Toggle - Visible on all screens */}
+        {/* Trading Mode Toggle */}
         <div className="flex bg-gray-100 p-1 rounded-lg shrink-0 gap-0.5 sm:gap-1">
              <button
                 onClick={() => setTradingMode('DEMO')}
@@ -224,7 +236,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <User size={14} className="text-blue-500 sm:w-4 sm:h-4" />
               </div>
             </div>
-            {/* Mobile User Icon */}
              <div onClick={onProfileClick} className="sm:hidden bg-gray-50 p-1.5 rounded-full border border-gray-200 cursor-pointer shrink-0">
                 <User size={14} className="text-blue-500" />
              </div>

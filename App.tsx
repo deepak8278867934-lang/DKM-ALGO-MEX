@@ -99,6 +99,10 @@ const App: React.FC = () => {
   const [initialAlertConfig, setInitialAlertConfig] = useState<AlertConfig | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // Publishing / Cloud State
+  const [isPublished, setIsPublished] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  
   const [trades, setTrades] = useState<Trade[]>(generateMockData());
   const [notifications, setNotifications] = useState<NotificationItem[]>(generateInitialNotifications(trades));
   const [strategies, setStrategies] = useState<StrategyConfig[]>([
@@ -205,10 +209,8 @@ const App: React.FC = () => {
 
   const handleStrategySave = (config: StrategyConfig) => {
     if (config.id && strategies.find(s => s.id === config.id)) {
-      // Update existing
       setStrategies(prev => prev.map(s => s.id === config.id ? config : s));
     } else {
-      // Add new
       const newStrategy = { 
         ...config, 
         id: Date.now().toString(), 
@@ -218,7 +220,26 @@ const App: React.FC = () => {
       setStrategies(prev => [newStrategy, ...prev]);
     }
     setEditingStrategy(null);
+    setIsPublished(false); // Mark as out of sync when local changes are made
     setCurrentView('my_strategies');
+  };
+
+  const handlePublishAll = () => {
+    setIsSyncing(true);
+    // Simulate cloud deployment
+    setTimeout(() => {
+        setIsSyncing(false);
+        setIsPublished(true);
+        setNotifications([{
+            id: Date.now(),
+            title: 'Published Successfully',
+            message: 'All strategies have been deployed to the live execution server.',
+            time: 'Just now',
+            type: 'success',
+            read: false,
+            source: 'System'
+        }, ...notifications]);
+    }, 2500);
   };
 
   const handleEditStrategy = (strategy: StrategyConfig) => {
@@ -228,14 +249,17 @@ const App: React.FC = () => {
 
   const handleToggleStrategy = (id: string) => {
     setStrategies(prev => prev.map(s => s.id === id ? { ...s, status: s.status === 'Active' ? 'Paused' : 'Active' } : s));
+    setIsPublished(false);
   };
 
   const handleDeleteStrategy = (id: string) => {
     setStrategies(prev => prev.filter(s => s.id !== id));
+    setIsPublished(false);
   };
 
   const handleBrokerChange = (field: keyof BrokerConfig, value: string) => {
       setBrokerConfig(prev => ({ ...prev, [field]: value }));
+      setIsPublished(false);
   };
   
   const handleUpdateNotifications = (newNotifications: NotificationItem[]) => {
@@ -251,11 +275,7 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (currentView) {
       case 'trade_history':
-        return (
-          <>
-            <TradeTable data={trades} onAddAlert={handleAddAlert} />
-          </>
-        );
+        return <TradeTable data={trades} onAddAlert={handleAddAlert} />;
       case 'dashboard':
         return <PlaceholderPage title="Dashboard" icon={<BarChart2 size={32} />} description="Overview of your trading performance and active strategy metrics will appear here." />;
       case 'strategy_builder':
@@ -268,6 +288,9 @@ const App: React.FC = () => {
                 onDelete={handleDeleteStrategy} 
                 onEdit={handleEditStrategy}
                 onNavigateToBuilder={() => { setEditingStrategy(null); setCurrentView('strategy_builder'); }}
+                isPublished={isPublished}
+                isSyncing={isSyncing}
+                onPublish={handlePublishAll}
             />
         );
       case 'signals':
@@ -305,6 +328,8 @@ const App: React.FC = () => {
             user={user}
             notifications={notifications}
             onClearNotifications={handleClearNotifications}
+            isPublished={isPublished}
+            isSyncing={isSyncing}
         />
         <main className="flex-1 p-4 lg:p-6 mt-16 overflow-y-auto">
           <div className="animate-in fade-in duration-300">

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Play, Pause, Trash2, Calendar, Activity, Layers, Plus, Edit2 } from 'lucide-react';
+import { Play, Pause, Trash2, Calendar, Activity, Layers, Plus, Edit2, Cloud, RefreshCw, Check } from 'lucide-react';
 import { StrategyConfig } from '../types';
 
 interface SavedStrategiesProps {
@@ -8,6 +9,9 @@ interface SavedStrategiesProps {
   onDelete: (id: string) => void;
   onEdit: (strategy: StrategyConfig) => void;
   onNavigateToBuilder: () => void;
+  isPublished?: boolean;
+  isSyncing?: boolean;
+  onPublish?: () => void;
 }
 
 export const SavedStrategies: React.FC<SavedStrategiesProps> = ({ 
@@ -15,7 +19,10 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
     onToggleStatus, 
     onDelete,
     onEdit,
-    onNavigateToBuilder
+    onNavigateToBuilder,
+    isPublished = true,
+    isSyncing = false,
+    onPublish
 }) => {
   return (
     <div className="w-full max-w-6xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -25,14 +32,48 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
             <h1 className="text-2xl font-bold text-gray-800">My Strategies</h1>
             <p className="text-gray-500 text-sm mt-1">Manage your active and paused algorithmic strategies</p>
         </div>
-        <button 
-          onClick={onNavigateToBuilder}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-500/20 group"
-        >
-          <Plus size={18} className="group-hover:rotate-90 transition-transform" />
-          Create New Strategy
-        </button>
+        
+        <div className="flex gap-2">
+            {!isPublished && strategies.length > 0 && (
+                <button 
+                  onClick={onPublish}
+                  disabled={isSyncing}
+                  className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-orange-500/20 group animate-pulse hover:animate-none"
+                >
+                  {isSyncing ? <RefreshCw size={18} className="animate-spin" /> : <Cloud size={18} />}
+                  {isSyncing ? 'Publishing...' : 'Sync to Cloud'}
+                </button>
+            )}
+            <button 
+              onClick={onNavigateToBuilder}
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-blue-500/20 group"
+            >
+              <Plus size={18} className="group-hover:rotate-90 transition-transform" />
+              Create New Strategy
+            </button>
+        </div>
       </div>
+
+      {isSyncing && (
+          <div className="mb-6 bg-blue-600/5 border border-blue-600/20 rounded-xl p-6 animate-in slide-in-from-top-2">
+              <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                      <RefreshCw size={20} className="text-blue-600 animate-spin" />
+                      <span className="text-sm font-bold text-blue-900">Deploying updates to cloud engine...</span>
+                  </div>
+                  <span className="text-xs font-mono text-blue-600 font-bold">EST: 2s</span>
+              </div>
+              <div className="w-full bg-blue-100 rounded-full h-1.5 overflow-hidden">
+                  <div className="bg-blue-600 h-full animate-[progress_2.5s_ease-in-out]"></div>
+              </div>
+              <style>{`
+                @keyframes progress {
+                    0% { width: 0%; }
+                    100% { width: 100%; }
+                }
+              `}</style>
+          </div>
+      )}
 
       {strategies.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center flex flex-col items-center">
@@ -54,7 +95,20 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {strategies.map((strategy) => (
-                <div key={strategy.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div key={strategy.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow relative">
+                    {/* Sync Status Badge */}
+                    <div className="absolute top-0 right-0 p-2">
+                        {isPublished ? (
+                            <div className="bg-green-500 text-white p-1 rounded-full shadow-sm" title="Synced with Cloud">
+                                <Check size={10} strokeWidth={4} />
+                            </div>
+                        ) : (
+                            <div className="bg-orange-500 text-white p-1 rounded-full shadow-sm animate-bounce" title="Changes pending sync">
+                                <Cloud size={10} />
+                            </div>
+                        )}
+                    </div>
+
                     {/* Card Header */}
                     <div className="p-5 border-b border-gray-100 flex justify-between items-start">
                         <div>
