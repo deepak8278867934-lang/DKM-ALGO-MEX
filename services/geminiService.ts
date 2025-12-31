@@ -1,10 +1,29 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Trade, AlertConfig, AlertCondition } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * Safely initializes the AI client.
+ * In this environment, the API key is provided via environment variables 
+ * and managed by the platform. The user does not need to provide it manually.
+ */
+const getAIClient = () => {
+  let apiKey = '';
+  try {
+    // Robust check for process.env to prevent white-screen crashes in browser
+    if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+      apiKey = process.env.API_KEY;
+    }
+  } catch (e) {
+    // Fallback silently to prevent blocking the main app thread
+    console.debug("Note: Using internal AI configuration.");
+  }
+  return new GoogleGenAI({ apiKey: apiKey || '' });
+};
 
 export const generateAlertSuggestion = async (trade: Trade): Promise<AlertConfig> => {
   try {
+    const ai = getAIClient();
     const prompt = `
       Analyze this trade data:
       Symbol: ${trade.symbol}
@@ -62,7 +81,7 @@ export const generateAlertSuggestion = async (trade: Trade): Promise<AlertConfig
 
   } catch (error) {
     console.error("Error generating alert suggestion:", error);
-    // Fallback default
+    // Fallback default so the UI doesn't break even if AI fails
     return {
       symbol: trade.symbol,
       price: trade.entryPrice,

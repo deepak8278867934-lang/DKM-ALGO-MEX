@@ -12,6 +12,8 @@
       body {
         font-family: 'Inter', sans-serif;
         background-color: #f3f4f6;
+        margin: 0;
+        overflow-x: hidden;
       }
       /* Custom scrollbar for table to match technical dashboards */
       ::-webkit-scrollbar {
@@ -35,6 +37,15 @@
       .animate-pulse-soft {
         animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
+      #loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #0c1017;
+        color: #4285F4;
+      }
     </style>
   <script type="importmap">
 {
@@ -49,6 +60,12 @@
 </script>
 </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+        <div id="loader">
+            <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">⚡ DKMALGOMAX</div>
+            <div style="font-size: 12px; font-family: monospace; letter-spacing: 2px;">INITIALIZING CLOUD TERMINAL...</div>
+        </div>
+    </div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
