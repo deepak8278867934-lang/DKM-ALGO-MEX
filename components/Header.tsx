@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, User, Power, CheckCircle, AlertTriangle, Info, Trash2, GraduationCap, Zap, Smartphone, Tablet, Monitor, Cloud, CloudOff, RefreshCw, Activity } from 'lucide-react';
+import { Menu, Bell, User, Power, CheckCircle, AlertTriangle, Info, Trash2, GraduationCap, Zap, Smartphone, Tablet, Monitor, Cloud, CloudOff, RefreshCw, Activity, ShieldCheck } from 'lucide-react';
 import { UserProfile, NotificationItem } from '../types';
 
 interface HeaderProps {
@@ -35,7 +35,6 @@ export const Header: React.FC<HeaderProps> = ({
   
   const notificationRef = useRef<HTMLDivElement>(null);
 
-  // Simulate shifting latency for realism
   useEffect(() => {
     if (isPublished) {
         const interval = setInterval(() => {
@@ -45,7 +44,6 @@ export const Header: React.FC<HeaderProps> = ({
     }
   }, [isPublished]);
 
-  // Track window resize for device info
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
@@ -58,7 +56,6 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
@@ -116,20 +113,22 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Cloud Status Indicator */}
       <div 
-        className="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 ml-2 cursor-pointer hover:bg-gray-100 transition-colors"
+        className={`hidden md:flex items-center gap-3 px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+            isPublished ? 'bg-green-50 border-green-100' : 'bg-orange-50 border-orange-100'
+        } ml-2 hover:shadow-sm`}
         onClick={() => onNavigate('broker_response')}
       >
          {isSyncing ? (
              <RefreshCw size={14} className="text-blue-500 animate-spin" />
          ) : isPublished ? (
-             <Cloud size={14} className="text-green-500" />
+             <ShieldCheck size={16} className="text-green-600" />
          ) : (
              <CloudOff size={14} className="text-orange-500" />
          )}
          <div className="flex flex-col">
              <div className="flex items-center gap-1.5">
                  <span className={`text-[9px] font-black uppercase tracking-widest ${isSyncing ? 'text-blue-600' : isPublished ? 'text-green-600' : 'text-orange-600'}`}>
-                     {isSyncing ? 'Syncing...' : isPublished ? 'Cloud Published' : 'Local Only'}
+                     {isSyncing ? 'Syncing...' : isPublished ? 'SYSTEM ONLINE' : 'LOCAL CHANGES'}
                  </span>
                  {isPublished && !isSyncing && (
                      <div className="flex items-center gap-1 text-[8px] font-bold text-gray-400">
@@ -138,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
                      </div>
                  )}
              </div>
-             <span className="text-[7px] text-gray-400 font-mono tracking-tight">SSL: AES-256 SECURED</span>
+             <span className="text-[7px] text-gray-400 font-mono tracking-tight uppercase">AWS-MUMBAI • SSL ACTIVE</span>
          </div>
          {isPublished && (
             <div className="relative flex h-2 w-2">
@@ -153,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Master Trading Switch (On/Off) */}
         <button
             onClick={() => setIsTradingActive(!isTradingActive)}
-            className={`flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300 ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-3 py-1.5 rounded-full border shadow-sm transition-all duration-300 ${
                 isTradingActive 
                 ? 'bg-green-100 border-green-200 text-green-700 hover:bg-green-200' 
                 : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
@@ -161,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
             <Power size={12} className={`sm:w-4 sm:h-4 ${isTradingActive ? "fill-current" : ""}`} />
             <span className="text-[8px] sm:text-xs font-bold uppercase whitespace-nowrap">
-                {isTradingActive ? 'ON' : 'OFF'}
+                {isTradingActive ? 'ACTIVE' : 'INACTIVE'}
             </span>
         </button>
 

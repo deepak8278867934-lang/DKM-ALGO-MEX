@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Zap, Calendar, Activity, Layers, Hash, Save, Check, Info, ArrowLeft } from 'lucide-react';
+import { Save, Check, Info, ArrowLeft, Layers, Hash, Zap, Target, ShieldCheck, Clock } from 'lucide-react';
 import { StrategyConfig, BrokerConfig } from '../types';
 
 interface StrategyBuilderProps {
@@ -19,11 +20,10 @@ export const StrategyBuilder: React.FC<StrategyBuilderProps> = ({ initialData, o
     strike: 'ATM',
     expiry: 'Current Week',
     gapRange: 0,
-    quantity: 15,
-    signalSource: 'TradingView',
-    scriptContent: '',
+    quantity: 50,
     productType: 'MIS',
-    orderType: 'MARKET'
+    orderType: 'MARKET',
+    signalSource: 'TradingView'
   });
 
   const [saved, setSaved] = useState(false);
@@ -40,22 +40,13 @@ export const StrategyBuilder: React.FC<StrategyBuilderProps> = ({ initialData, o
   };
 
   const handleSave = () => {
-    // Enrich with metadata if new, or preserve if editing
-    const updatedStrategy: StrategyConfig = {
-        ...formData,
-        id: formData.id || Date.now().toString(),
-        status: formData.status || 'Active',
-        createdAt: formData.createdAt || new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
-    };
-    
-    onSave(updatedStrategy);
+    onSave(formData);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   return (
     <div className="w-full max-w-5xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Page Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
@@ -69,217 +60,175 @@ export const StrategyBuilder: React.FC<StrategyBuilderProps> = ({ initialData, o
           <p className="text-gray-500 text-sm">Configure automated strategies with real-time execution parameters</p>
         </div>
         <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
-           <Info size={14} /> Active Broker: {brokerConfig.broker}
+           <Info size={14} /> Broker: {brokerConfig.broker}
         </div>
       </div>
 
-      {/* Main Strategy Card */}
       <div className="bg-[#131722] text-white rounded-xl shadow-2xl overflow-hidden border border-gray-800">
-         
-         {/* Card Header */}
          <div className="p-5 border-b border-gray-800 flex items-center justify-between bg-[#1e222d]">
             <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded text-white shadow-lg shadow-blue-900/50">
                     <Zap size={20} fill="currentColor" />
                 </div>
-                <h2 className="text-lg font-bold text-white tracking-wide">{initialData ? 'Update Configuration' : 'Strategy Configuration'}</h2>
+                <h2 className="text-lg font-bold text-white tracking-wide">Strategy Parameters</h2>
             </div>
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">v2.5 Terminal</span>
+            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Engine Ready
+            </div>
          </div>
 
-         {/* Form Content - Grid Layout for Desktop */}
          <div className="p-6 md:p-8 space-y-8">
-            
-            {/* Strategy Name - Full Width */}
-            <div className="max-w-2xl">
-                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Strategy Name</label>
-                <div className="relative group">
-                    <Layers size={16} className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
-                    <input 
-                        type="text" 
-                        value={formData.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                        placeholder="e.g. Nifty Intraday breakout"
-                        className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-10 pr-3 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors font-bold"
-                    />
+            {/* General Info Section */}
+            <div>
+                <h3 className="text-xs font-black text-blue-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                    <Layers size={14} /> General Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Strategy Name</label>
+                        <div className="relative group">
+                            <Layers size={16} className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                            <input 
+                                type="text" 
+                                value={formData.name}
+                                onChange={(e) => handleChange('name', e.target.value)}
+                                placeholder="e.g. Nifty Scalping Pro"
+                                className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-10 pr-3 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors font-bold"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Signal Source</label>
+                        <div className="relative group">
+                            <Zap size={16} className="absolute left-3 top-3.5 text-gray-500" />
+                            <select 
+                                value={formData.signalSource}
+                                onChange={(e) => handleChange('signalSource', e.target.value)}
+                                className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-10 pr-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                            >
+                                <option value="TradingView">TradingView Webhook</option>
+                                <option value="Manual">Manual Terminal</option>
+                                <option value="API">External API</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-                {/* Symbol */}
-                <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Symbol</label>
-                    <div className="relative group">
-                        <Activity size={16} className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+            {/* Instrument Settings Section */}
+            <div>
+                <h3 className="text-xs font-black text-blue-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                    <Target size={14} /> Instrument Settings
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Symbol</label>
                         <select 
                             value={formData.symbol}
                             onChange={(e) => handleChange('symbol', e.target.value)}
-                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-10 pr-8 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
                         >
                             <option value="NIFTY">NIFTY</option>
                             <option value="BANKNIFTY">BANKNIFTY</option>
                             <option value="FINNIFTY">FINNIFTY</option>
-                            <option value="MIDCPNIFTY">MIDCPNIFTY</option>
-                            <option value="SENSEX">SENSEX</option>
-                            <option value="CRUDEOIL">CRUDEOIL</option>
                         </select>
-                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                          </div>
                     </div>
-                </div>
-
-                {/* Exchange */}
-                <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Exchange</label>
-                    <div className="relative">
-                         <select 
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Exchange</label>
+                        <select 
                             value={formData.exchange}
                             onChange={(e) => handleChange('exchange', e.target.value)}
-                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-3 pr-8 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
                         >
-                            <option>NSE</option>
-                            <option>FNO</option>
-                            <option>BSE</option>
-                            <option>MCX</option>
+                            <option value="NSE">NSE</option>
+                            <option value="NFO">NFO</option>
+                            <option value="MCX">MCX</option>
                         </select>
-                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                          </div>
                     </div>
-                </div>
-
-                {/* Instrument Type */}
-                <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Type</label>
-                    <div className="relative">
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Type</label>
                         <select 
                             value={formData.type}
                             onChange={(e) => handleChange('type', e.target.value)}
-                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
                         >
                             <option value="OPTION">OPTION</option>
                             <option value="FUTURE">FUTURE</option>
                             <option value="EQUITY">EQUITY</option>
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                        </div>
                     </div>
-                </div>
-
-                {/* Option Type */}
-                {formData.type === 'OPTION' && (
-                     <div>
-                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Option Type</label>
-                         <div className="relative">
-                            <select 
-                                value={formData.optionType}
-                                onChange={(e) => handleChange('optionType', e.target.value)}
-                                className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
-                            >
-                                <option value="CE">CALL (CE)</option>
-                                <option value="PE">PUT (PE)</option>
-                                <option value="BOTH">BOTH</option>
-                            </select>
-                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                             </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Strike Selection */}
-                 <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Strike</label>
-                    <div className="relative">
-                         <select 
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Strike Selection</label>
+                        <select 
                             value={formData.strike}
                             onChange={(e) => handleChange('strike', e.target.value)}
-                            disabled={formData.type !== 'OPTION'}
-                            className={`w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer ${formData.type !== 'OPTION' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
                         >
-                             <option>ATM</option>
-                             <option>OTM 1</option>
-                             <option>OTM 2</option>
-                             <option>OTM 3</option>
-                             <option>ITM 1</option>
-                             <option>ITM 2</option>
-                             <option>ITM 3</option>
+                            <option value="ATM">ATM</option>
+                            <option value="ITM 1">ITM 1</option>
+                            <option value="ITM 2">ITM 2</option>
+                            <option value="OTM 1">OTM 1</option>
+                            <option value="OTM 2">OTM 2</option>
                         </select>
-                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            {/* Execution Details Section */}
+            <div>
+                <h3 className="text-xs font-black text-blue-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                    <ShieldCheck size={14} /> Execution Details
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Quantity / Lots</label>
+                        <div className="relative group">
+                            <Hash size={14} className="absolute left-3 top-3.5 text-gray-500" />
+                            <input 
+                                type="number" 
+                                value={formData.quantity}
+                                onChange={(e) => handleChange('quantity', parseInt(e.target.value))}
+                                className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-10 pr-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 transition-colors"
+                            />
                         </div>
                     </div>
-                </div>
-
-                {/* Expiry */}
-                 <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Expiry</label>
-                    <div className="relative group">
-                         <Calendar size={16} className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
-                         <select 
-                            value={formData.expiry}
-                            onChange={(e) => handleChange('expiry', e.target.value)}
-                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-10 pr-8 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
-                        >
-                            <option>Current Week</option>
-                            <option>Next Week</option>
-                            <option>Current Month</option>
-                            <option>Next Month</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Quantity */}
-                <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Lot Size / Qty</label>
-                    <div className="relative group">
-                         <Hash size={16} className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
-                        <input 
-                            type="number" 
-                            value={formData.quantity}
-                            onChange={(e) => handleChange('quantity', parseFloat(e.target.value))}
-                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md pl-10 pr-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
-                            placeholder="Qty"
-                        />
-                    </div>
-                </div>
-
-                {/* Product Type */}
-                <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Product Type</label>
-                    <div className="relative">
-                         <select 
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Product Type</label>
+                        <select 
                             value={formData.productType}
                             onChange={(e) => handleChange('productType', e.target.value)}
-                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
                         >
                             <option value="MIS">MIS (Intraday)</option>
                             <option value="NRML">NRML (Carry Forward)</option>
                             <option value="CNC">CNC (Delivery)</option>
                         </select>
-                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                          </div>
                     </div>
-                </div>
-
-                {/* Order Type */}
-                <div>
-                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Order Type</label>
-                    <div className="relative">
-                         <select 
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Order Type</label>
+                        <select 
                             value={formData.orderType}
                             onChange={(e) => handleChange('orderType', e.target.value)}
-                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500 appearance-none cursor-pointer"
+                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
                         >
                             <option value="MARKET">MARKET</option>
                             <option value="LIMIT">LIMIT</option>
+                            <option value="SL-LIMIT">SL-LIMIT</option>
+                            <option value="SL-MARKET">SL-MARKET</option>
                         </select>
-                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                          </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Expiry</label>
+                        <select 
+                            value={formData.expiry}
+                            onChange={(e) => handleChange('expiry', e.target.value)}
+                            className="w-full bg-[#1e222d] border border-gray-700 rounded-md px-3 py-3 text-sm text-white font-bold focus:outline-none focus:border-blue-500"
+                        >
+                            <option value="Current Week">Current Week</option>
+                            <option value="Next Week">Next Week</option>
+                            <option value="Current Month">Current Month</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -297,23 +246,32 @@ export const StrategyBuilder: React.FC<StrategyBuilderProps> = ({ initialData, o
                     <div className="bg-white/20 p-2 rounded-full mr-3 group-hover:scale-110 transition-transform">
                         {saved ? <Check size={20} /> : <Save size={20} />}
                     </div>
-                    <span className="text-lg font-bold">
-                        {saved ? (initialData ? 'Update Saved' : 'Strategy Saved') : (initialData ? 'Update Strategy' : 'Save Strategy')}
+                    <span className="text-lg font-bold uppercase tracking-tighter">
+                        {saved ? 'Settings Saved' : (initialData ? 'Update Strategy' : 'Save Strategy')}
                     </span>
                 </button>
                 {onCancel && (
                     <button 
                         onClick={onCancel}
-                        className="w-full md:w-auto px-8 py-4 border border-gray-700 text-gray-400 font-bold rounded-xl hover:bg-gray-800 transition-colors"
+                        className="w-full md:w-auto px-8 py-4 border border-gray-700 text-gray-400 font-bold rounded-xl hover:bg-gray-800 transition-colors uppercase text-sm"
                     >
                         Cancel
                     </button>
                 )}
-                <p className="text-xs text-gray-500 max-w-sm text-center md:text-left ml-auto">
-                    * Make sure to refresh your broker token daily before market open to ensure the strategy executes correctly.
-                </p>
             </div>
          </div>
+      </div>
+
+      <div className="mt-8 bg-blue-500/5 border border-blue-500/10 rounded-xl p-6 flex items-start gap-4">
+          <div className="bg-blue-600 p-2 rounded text-white shadow-md">
+              <Clock size={20} />
+          </div>
+          <div>
+              <h4 className="text-blue-400 font-bold text-sm mb-1 uppercase tracking-wider">Market Safety Protocol Active</h4>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                  All strategies created via the builder include automatic order validation and margin check protocols before being sent to {brokerConfig.broker}. Ensure your TradingView webhook signals are correctly formatted to match these parameters.
+              </p>
+          </div>
       </div>
     </div>
   );

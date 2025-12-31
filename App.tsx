@@ -13,10 +13,8 @@ import { Login } from './components/Login';
 import { Profile } from './components/Profile';
 import { Notifications } from './components/Notifications';
 import { ServerLogs } from './components/ServerLogs';
-import { Dashboard } from './components/Dashboard';
 import { Trade, AlertConfig, SavedAlert, AlertCondition, BrokerConfig, UserProfile, NotificationItem, StrategyConfig } from './types';
-import { Activity, Zap, Server, BarChart2, Bell, Clock, Layers, Loader2, ShieldCheck } from 'lucide-react';
-import { Logo } from './components/Logo';
+import { Activity, Zap, Server, BarChart2, Bell, Clock, Layers, Cloud, AlertTriangle, RefreshCw, Check } from 'lucide-react';
 
 // Helper to generate dynamic mock data
 const generateMockData = (): Trade[] => {
@@ -87,7 +85,7 @@ const PlaceholderPage: React.FC<{ title: string; icon: React.ReactNode; descript
       </div>
     </div>
     <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
-    <p className="max-md">{description}</p>
+    <p className="max-w-md">{description}</p>
     <button className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
       Refresh Data
     </button>
@@ -95,10 +93,7 @@ const PlaceholderPage: React.FC<{ title: string; icon: React.ReactNode; descript
 );
 
 const App: React.FC = () => {
-  // SET TO TRUE BY DEFAULT TO ENSURE APP "OPENS" IMMEDIATELY
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [isBooting, setIsBooting] = useState(true);
-  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserProfile>(DEFAULT_USER);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
@@ -131,14 +126,6 @@ const App: React.FC = () => {
     }
   ]);
   const [editingStrategy, setEditingStrategy] = useState<StrategyConfig | null>(null);
-
-  useEffect(() => {
-    // Artificial boot up delay for professional feel
-    const timer = setTimeout(() => {
-        setIsBooting(false);
-    }, 1800);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     const checkTimeAndDate = () => {
@@ -192,17 +179,17 @@ const App: React.FC = () => {
       tokenExpiry: '31/12/2025 08:30:00'
   });
   
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [currentView, setCurrentView] = useState('trade_history');
 
   const handleLogin = (userData?: Partial<UserProfile>) => {
       if (userData) setUser(prev => ({ ...prev, ...userData }));
       setIsAuthenticated(true);
-      setCurrentView('dashboard'); 
+      setCurrentView('trade_history'); 
   };
 
   const handleLogout = () => {
       setIsAuthenticated(false);
-      setCurrentView('dashboard');
+      setCurrentView('trade_history');
   };
 
   const handleAddAlert = (trade: Trade) => {
@@ -234,7 +221,7 @@ const App: React.FC = () => {
       setStrategies(prev => [newStrategy, ...prev]);
     }
     setEditingStrategy(null);
-    setIsPublished(false); // Mark as out of sync when local changes are made
+    setIsPublished(false); // Mark as out of sync
     setCurrentView('my_strategies');
   };
 
@@ -246,14 +233,14 @@ const App: React.FC = () => {
         setIsPublished(true);
         setNotifications([{
             id: Date.now(),
-            title: 'Published Successfully',
-            message: 'All strategies have been deployed to the live execution server.',
+            title: 'System Online',
+            message: 'All strategy and broker updates are now LIVE on the cloud engine.',
             time: 'Just now',
             type: 'success',
             read: false,
             source: 'System'
         }, ...notifications]);
-    }, 2500);
+    }, 2800);
   };
 
   const handleEditStrategy = (strategy: StrategyConfig) => {
@@ -284,39 +271,14 @@ const App: React.FC = () => {
       setNotifications([]);
   };
 
-  // Boot up screen
-  if (isBooting) {
-      return (
-          <div className="min-h-screen bg-[#0c1017] flex flex-col items-center justify-center p-4">
-              <div className="animate-pulse mb-8">
-                  <Logo variant="dark" className="scale-150" />
-              </div>
-              <div className="flex items-center gap-3 text-blue-500 font-bold tracking-widest uppercase text-xs">
-                  <Loader2 className="animate-spin" size={20} />
-                  Initializing Cloud Engine...
-              </div>
-              <div className="mt-12 w-64 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-600 animate-[progress_1.8s_ease-in-out] w-full origin-left"></div>
-              </div>
-              <style>{`
-                @keyframes progress {
-                    0% { transform: scaleX(0); }
-                    100% { transform: scaleX(1); }
-                }
-              `}</style>
-              <p className="mt-4 text-gray-600 text-[10px] font-mono">NODE: imaginative-clafoutis-8dc5b0</p>
-          </div>
-      );
-  }
-
   if (!isAuthenticated) return <Login onLogin={handleLogin} />;
 
   const renderContent = () => {
     switch (currentView) {
-      case 'dashboard':
-        return <Dashboard />;
       case 'trade_history':
         return <TradeTable data={trades} onAddAlert={handleAddAlert} />;
+      case 'dashboard':
+        return <PlaceholderPage title="Dashboard" icon={<BarChart2 size={32} />} description="Overview of your trading performance and active strategy metrics will appear here." />;
       case 'strategy_builder':
         return <StrategyBuilder initialData={editingStrategy} onSave={handleStrategySave} brokerConfig={brokerConfig} onCancel={() => { setEditingStrategy(null); setCurrentView('my_strategies'); }} />;
       case 'my_strategies':
@@ -338,7 +300,7 @@ const App: React.FC = () => {
       case 'broker_configuration':
         return <BrokerConfiguration config={brokerConfig} onChange={handleBrokerChange} onSave={() => {}} />;
       case 'tradingview_integration':
-        return <TradingViewIntegration brokerConfig={brokerConfig} />;
+        return <TradingViewIntegration brokerConfig={brokerConfig} isPublished={isPublished} />;
       case 'pine_script_logic':
         return <PineScriptManager />;
       case 'broker_response':
@@ -372,12 +334,79 @@ const App: React.FC = () => {
             isPublished={isPublished}
             isSyncing={isSyncing}
         />
-        <main className="flex-1 p-4 lg:p-6 mt-16 overflow-y-auto">
-          <div className="animate-in fade-in duration-300">
+        <main className="flex-1 p-0 lg:p-0 mt-16 overflow-y-auto">
+          {/* Unsynced Changes Global Alert Bar */}
+          {!isPublished && (
+              <div className="bg-orange-600 text-white px-4 py-2 flex items-center justify-between animate-in slide-in-from-top-4 duration-300 sticky top-0 z-30 shadow-md">
+                  <div className="flex items-center gap-3">
+                      <div className="bg-white/20 p-1 rounded">
+                          <AlertTriangle size={16} />
+                      </div>
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                          Unpublished Changes: You must publish to make changes LIVE on the server.
+                      </span>
+                  </div>
+                  <button 
+                    onClick={handlePublishAll}
+                    disabled={isSyncing}
+                    className="bg-white text-orange-600 px-3 py-1 rounded text-[10px] sm:text-xs font-black uppercase hover:bg-orange-50 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                      {isSyncing ? <RefreshCw size={12} className="animate-spin" /> : <Cloud size={12} />}
+                      {isSyncing ? 'Syncing...' : 'Publish Now'}
+                  </button>
+              </div>
+          )}
+          
+          <div className="p-4 lg:p-6 animate-in fade-in duration-300">
              {renderContent()}
           </div>
         </main>
       </div>
+      
+      {/* Deployment Modal Overlay */}
+      {isSyncing && (
+          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+              <div className="bg-[#131722] border border-gray-800 rounded-2xl w-full max-w-lg p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+                  <div className="flex flex-col items-center text-center">
+                      <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-20 animate-pulse"></div>
+                          <RefreshCw size={64} className="text-blue-500 animate-spin relative z-10" strokeWidth={1} />
+                      </div>
+                      <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-2">Publishing to Cloud</h2>
+                      <p className="text-gray-400 text-sm mb-8">Deploying your strategy parameters to AWS (Asia-South-1)</p>
+                      
+                      <div className="w-full space-y-4 mb-8">
+                          {[
+                              { label: 'Broker Credentials', status: 'verified' },
+                              { label: 'Pine Script Logic Buffer', status: 'compiling' },
+                              { label: 'Webhook Endpoints', status: 'pending' }
+                          ].map((item, i) => (
+                              <div key={i} className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-gray-500 border-b border-gray-800 pb-2">
+                                  <span>{item.label}</span>
+                                  <span className={i === 0 ? 'text-green-500' : 'animate-pulse text-blue-500'}>
+                                      {i === 0 ? '✓ COMPLETED' : i === 1 ? 'PROCESSING...' : 'WAITING...'}
+                                  </span>
+                              </div>
+                          ))}
+                      </div>
+                      
+                      <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                          <div className="bg-blue-600 h-full animate-[deployment-progress_2.8s_ease-in-out]"></div>
+                      </div>
+                  </div>
+              </div>
+              <style>{`
+                @keyframes deployment-progress {
+                    0% { width: 0%; }
+                    10% { width: 5%; }
+                    40% { width: 45%; }
+                    70% { width: 85%; }
+                    100% { width: 100%; }
+                }
+              `}</style>
+          </div>
+      )}
+
       <AlertModal 
         isOpen={isAlertModalOpen} 
         onClose={() => setIsAlertModalOpen(false)} 

@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
-import { Globe, Copy, Check, Info, Settings, HelpCircle } from 'lucide-react';
+import { Globe, Copy, Check, Info, Settings, HelpCircle, AlertTriangle } from 'lucide-react';
 import { BrokerConfig } from '../types';
 
 interface TradingViewIntegrationProps {
   brokerConfig: BrokerConfig;
+  isPublished?: boolean;
 }
 
-export const TradingViewIntegration: React.FC<TradingViewIntegrationProps> = ({ brokerConfig }) => {
+export const TradingViewIntegration: React.FC<TradingViewIntegrationProps> = ({ brokerConfig, isPublished = true }) => {
   const [copied, setCopied] = useState(false);
   const [jsonCopied, setJsonCopied] = useState(false);
   
@@ -50,6 +52,18 @@ export const TradingViewIntegration: React.FC<TradingViewIntegrationProps> = ({ 
         </button>
       </div>
 
+      {!isPublished && (
+          <div className="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-4 text-orange-700 animate-in zoom-in-95">
+              <div className="bg-orange-500 p-2 rounded text-white shadow-md">
+                  <AlertTriangle size={20} />
+              </div>
+              <div className="flex-1">
+                  <h4 className="text-sm font-black uppercase tracking-widest">Publish Changes Required</h4>
+                  <p className="text-xs font-bold opacity-80">You have modified your configuration. Your Webhook will not execute new logic until you click "Sync to Cloud".</p>
+              </div>
+          </div>
+      )}
+
       {/* Main Card */}
       <div className="bg-[#131722] text-white rounded-xl shadow-2xl overflow-hidden border border-gray-800">
           
@@ -61,8 +75,8 @@ export const TradingViewIntegration: React.FC<TradingViewIntegrationProps> = ({ 
                 </div>
                 <h2 className="text-lg font-bold text-white tracking-wide">TradingView Webhook Integration</h2>
               </div>
-              <div className="bg-green-500/10 text-green-400 text-[10px] font-bold px-2 py-1 rounded border border-green-500/20">
-                  LISTENING
+              <div className={`text-[10px] font-bold px-2 py-1 rounded border ${isPublished ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20'}`}>
+                  {isPublished ? 'LISTENING (LIVE)' : 'OUT OF SYNC'}
               </div>
           </div>
           

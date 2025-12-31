@@ -54,27 +54,6 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
         </div>
       </div>
 
-      {isSyncing && (
-          <div className="mb-6 bg-blue-600/5 border border-blue-600/20 rounded-xl p-6 animate-in slide-in-from-top-2">
-              <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                      <RefreshCw size={20} className="text-blue-600 animate-spin" />
-                      <span className="text-sm font-bold text-blue-900">Deploying updates to cloud engine...</span>
-                  </div>
-                  <span className="text-xs font-mono text-blue-600 font-bold">EST: 2s</span>
-              </div>
-              <div className="w-full bg-blue-100 rounded-full h-1.5 overflow-hidden">
-                  <div className="bg-blue-600 h-full animate-[progress_2.5s_ease-in-out]"></div>
-              </div>
-              <style>{`
-                @keyframes progress {
-                    0% { width: 0%; }
-                    100% { width: 100%; }
-                }
-              `}</style>
-          </div>
-      )}
-
       {strategies.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center flex flex-col items-center">
             <div className="bg-gray-100 p-4 rounded-full mb-4">
@@ -96,8 +75,7 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {strategies.map((strategy) => (
                 <div key={strategy.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow relative">
-                    {/* Sync Status Badge */}
-                    <div className="absolute top-0 right-0 p-2">
+                    <div className="absolute top-0 right-0 p-2 flex gap-1">
                         {isPublished ? (
                             <div className="bg-green-500 text-white p-1 rounded-full shadow-sm" title="Synced with Cloud">
                                 <Check size={10} strokeWidth={4} />
@@ -109,7 +87,6 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
                         )}
                     </div>
 
-                    {/* Card Header */}
                     <div className="p-5 border-b border-gray-100 flex justify-between items-start">
                         <div>
                             <h3 className="font-bold text-gray-800 text-lg leading-tight mb-1">{strategy.name}</h3>
@@ -128,7 +105,6 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
                         </div>
                     </div>
 
-                    {/* Card Body */}
                     <div className="p-5 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -136,12 +112,12 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
                                 <p className="text-sm font-bold text-gray-700">{strategy.quantity} <span className="text-xs font-normal text-gray-400">Lots/Qty</span></p>
                             </div>
                             <div>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase">Type</p>
-                                <p className="text-sm font-bold text-gray-700">{strategy.type} {strategy.type === 'OPTION' && `(${strategy.optionType})`}</p>
-                            </div>
-                             <div>
                                 <p className="text-[10px] text-gray-400 font-bold uppercase">Order</p>
                                 <p className="text-sm font-bold text-gray-700">{strategy.orderType}</p>
+                            </div>
+                             <div>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase">Strike</p>
+                                <p className="text-sm font-bold text-gray-700">{strategy.strike}</p>
                             </div>
                              <div>
                                 <p className="text-[10px] text-gray-400 font-bold uppercase">Expiry</p>
@@ -152,15 +128,14 @@ export const SavedStrategies: React.FC<SavedStrategiesProps> = ({
                         <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                             <div className="flex items-center gap-2 mb-1">
                                 <Activity size={12} className="text-blue-500" />
-                                <span className="text-xs font-bold text-gray-700">Execution Logic</span>
+                                <span className="text-xs font-bold text-gray-700">Automation Settings</span>
                             </div>
-                            <p className="text-[11px] text-gray-500 leading-snug">
-                                Signals via {strategy.signalSource}. {strategy.type === 'OPTION' ? `Strike Selection: ${strategy.strike}` : ''}
+                            <p className="text-[11px] text-gray-500 leading-snug line-clamp-2">
+                                Signals via {strategy.signalSource}. Order will execute as {strategy.orderType} on {strategy.exchange}.
                             </p>
                         </div>
                     </div>
 
-                    {/* Card Footer Actions */}
                     <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                         <div className="text-[10px] text-gray-400 flex items-center gap-1">
                             <Calendar size={12} />
